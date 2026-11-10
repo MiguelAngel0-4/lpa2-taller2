@@ -12,7 +12,7 @@ import os
 
 app = Flask(__name__)
 # Debe coincidir con el nombre de la variable definida en docker-compose.yml
-BACKEND_URL = os.getenv('BACKEND_API_URL', 'http://backend:8000')
+BACKEND_URL = os.getenv('BACKEND_URL', 'http://backend:8000')
 
 
 def texto(valor):
