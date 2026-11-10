@@ -7,16 +7,31 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
 <body>
-    <div class="container">
+    <div class="container" id="contenedor">
         <h1>Generador de Facturas PDF</h1>
-        <form method="POST" action="/generar-pdf">
+
+        <!-- action y method se conservan: si JavaScript falla, el formulario sigue funcionando -->
+        <form id="form-factura" method="POST" action="/generar-pdf">
             <div class="form-group">
                 <label for="id_factura">ID de Factura:</label>
-                <input type="text" id="id_factura" name="id_factura" required>
+                <input type="text" id="id_factura" name="id_factura"
+                       placeholder="Ej: FAC-2025-001" required>
             </div>
-            <button type="submit">Generar PDF</button>
+            <button type="submit" id="btn-generar">Generar Factura</button>
         </form>
-        
+
+        <!-- Mensajes de error (aria-live hace que los lectores de pantalla los anuncien) -->
+        <div id="mensaje" class="alert" role="alert" aria-live="polite" hidden></div>
+
+        <!-- Vista previa: oculta hasta que exista un PDF -->
+        <section id="vista-previa" class="vista-previa" hidden>
+            <div class="vista-previa-encabezado">
+                <h2 id="titulo-vista-previa">Vista previa</h2>
+                <a id="btn-descargar" class="btn-descargar" href="#">Descargar PDF</a>
+            </div>
+            <iframe id="visor-pdf" title="Vista previa de la factura en PDF"></iframe>
+        </section>
+
         {% with messages = get_flashed_messages() %}
             {% if messages %}
                 <div class="alert">
@@ -27,5 +42,7 @@
             {% endif %}
         {% endwith %}
     </div>
+
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
 </body>
 </html>
