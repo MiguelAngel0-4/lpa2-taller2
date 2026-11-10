@@ -4,7 +4,7 @@ Sistema completo de generación de facturas, utilizando [FastAPI](https://fastap
 
 ## Autor
 
-- Nombre del Estudiante - @perfil_de_github
+- Miguel Angel Fernandez Samboni - @MiguelAngel0-4
 
 ## Descripción del Proyecto
 
