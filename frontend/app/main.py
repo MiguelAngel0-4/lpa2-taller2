@@ -1,61 +1,61 @@
-from flask import Flask, render_template, request, send_file, abort
-import requests
-from reportlab.lib.pagesizes import A4
-from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer
-from reportlab.lib import colors
-from reportlab.lib.styles import getSampleStyleSheet
-from reportlab.lib.units import mm
-from io import BytesIO
-import os
+from fastapi import FastAPI
+from faker import Faker
+import random
 
-app = Flask(__name__)
-BACKEND_URL = os.getenv('BACKEND_URL', 'http://backend:8000')
+app = FastAPI(title="API de Facturas Fake", version="1.0")
 
-@app.route('/')
-def index():
-    return render_template('index.html')
-
-@app.route('/generar-pdf', methods=['POST'])
-def generar_pdf():
-    try:
-        id_factura = request.form['id_factura']
-        response = requests.get(f'{BACKEND_URL}/facturas/v1/{id_factura}')
-        
-        if response.status_code != 200:
-            abort(404, description="Factura no encontrada")
-            
-        factura = response.json()
-        
-        # TODO: Crear buffer y doc para la creación del PDF
-        
-
-        # TODO: Adicionar el Título, ID
-
-        
-        # TODO: Agregar Información de la Empresa
+fake = Faker("es_ES")
 
 
-        # TODO: Agregar Información del Cliente
+@app.get("/")
+def health():
+    """Endpoint de salud: lo usa el healthcheck del docker-compose."""
+    return {"status": "ok"}
 
 
-        # TODO: Adicionar el Detalle de la Factura: cantidad, descripción, precio unitario y total
+@app.get("/facturas/v1/{numero_factura}")
+def get_factura(numero_factura: str):
+    # Generar datos falsos para empresa y cliente
+    empresa = {
+        "nombre": fake.company(),
+        "direccion": fake.address(),
+        "telefono": fake.phone_number(),
+        "email": fake.company_email()
+    }
 
+    cliente = {
+        "nombre": fake.company(),
+        "direccion": fake.address(),
+        "telefono": fake.phone_number()
+    }
 
-        # TODO: Adicionar Subtotal, impuesto y Total
+    # Generar entre 1 y 5 ítems de detalle
+    detalle = []
+    for _ in range(random.randint(1, 5)):
+        cantidad = random.randint(1, 10)
+        precio_unitario = round(random.uniform(50, 500), 2)
+        total = round(cantidad * precio_unitario, 2)
+        detalle.append({
+            "descripcion": fake.catch_phrase(),
+            "cantidad": cantidad,
+            "precio_unitario": precio_unitario,
+            "total": total
+        })
 
+    subtotal = round(sum(item["total"] for item in detalle), 2)
+    impuesto = round(subtotal * 0.21, 2)  # IVA 21%
+    total = round(subtotal + impuesto, 2)
 
-        # Generar el doc y limpiar el buffer
-        doc.build(elements)
-        buffer.seek(0)
-        
-        # TODO: Retornar a la página el PDF para visualizar y descargar
+    factura = {
+        "numero_factura": numero_factura,
+        "fecha_emision": str(fake.date_between(start_date="-1y", end_date="today")),
+        "empresa": empresa,
+        "cliente": cliente,
+        "detalle": detalle,
+        "subtotal": subtotal,
+        "impuesto": impuesto,
+        "total": total
+    }
 
-        
-    except requests.exceptions.ConnectionError:
-        abort(503, description="Error de conexión con el servidor")
-    except Exception as e:
-        abort(500, description=str(e))
-
-if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=3000, debug=True)
+    return factura
 
